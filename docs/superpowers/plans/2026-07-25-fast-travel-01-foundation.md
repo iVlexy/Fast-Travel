@@ -851,6 +851,24 @@ git push
 
 ---
 
+## Post-Review Amendments (commit `22b3193`)
+
+A full-branch code review after implementation found three real defects. The inline task snippets above predate these fixes; the shipped code is authoritative. Amendments:
+
+1. **Fixture total distance** — `FIXTURE_ROUTE.distance` was `1704` (a copy error; `852 × 2`) but the steps/geometry sum to **`1408`**. Corrected to `1408`. Assertions that hard-coded `1704` (`navSession.test.ts` `beginNav`, `directions.test.ts`, `routeController.test.ts`, and the ETA-comment) were updated to `1408` accordingly.
+2. **Final-step remaining** — `updateNav` relied on a "return 0 when out of range" sentinel for `stepIndex + 1` on the last step, collapsing `distanceRemaining`/`etaSeconds` to `0` while still `navigating` (the 25–30 m band, and any single-step-remaining route). Now, when `stepIndex >= lastStepIndex`, `distanceToNextTurn` and `distanceRemaining` are measured to the destination (`distToDest`).
+3. **Empty-route guard** — `updateNav` dereferenced `route.geometry[last]` unconditionally; a degenerate `{ steps: [], geometry: [] }` route (possible from a real provider in Plan 3) would throw. Added an early guard returning `{ ...prev, position, speed }`.
+
+Tests were hardened alongside: tightened ETA bounds, a mid-route remaining-distance assertion, off-route→recovery, a final-approach "not premature 0" case, and a degenerate-route no-throw case. Full suite: **23/23 green**, `tsc --noEmit` clean.
+
+### Carried into Plan 2/3 (not fixed in Plan 1)
+- `package.json` `"main": "src/index.ts"` is not a valid Expo entry — must change to `expo-router/entry` / `registerRootComponent` when the first App component lands in **Plan 2**.
+- `distanceToNextTurn`/`distanceRemaining` use straight-line haversine to the maneuver, not along-polyline distance — revisit with real Mapbox geometry in **Plan 3**.
+- Step advance keys off proximity to the maneuver *location*, not progress along the polyline — fine for street routes; consider a progress-based model for looping routes in **Plan 3**.
+- Arrival is not "sticky" — a fix moving away after `arrived` flips back to `navigating`. Decide whether to latch in **Plan 2**.
+
+---
+
 ## Next
 
 Plan 2 (Theme engine + 5 skin manifests + switcher) authored after Plan 1 lands. Mapbox token instructions delivered just before Plan 3 (first token-requiring milestone).
