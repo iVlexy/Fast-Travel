@@ -1,5 +1,7 @@
+import { MapboxDirectionsResponse } from '../mapboxDirections';
+
 // Trimmed but shape-accurate Mapbox Directions v5 response (geometries=geojson, steps=true).
-export const MAPBOX_SAMPLE = {
+export const MAPBOX_SAMPLE: MapboxDirectionsResponse = {
   code: 'Ok',
   routes: [
     {

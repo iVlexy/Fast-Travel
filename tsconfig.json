@@ -8,7 +8,7 @@
     "lib": ["esnext"],
     "jsx": "react-native",
     "skipLibCheck": true,
-    "types": ["jest", "react"],
+    "types": ["jest", "react", "node"],
     "baseUrl": ".",
     "paths": { "@/*": ["src/*"] }
   },
