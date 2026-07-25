@@ -625,17 +625,18 @@ export function updateNav(prev: NavState, position: LatLng, speed: number): NavS
     return { ...prev, status: 'off-route', position, speed };
   }
 
-  // Advance the step if we're within ADVANCE_M of the current maneuver point.
+  // Advance the step once we're within ADVANCE_M of the NEXT maneuver point
+  // (currentStepIndex = the step being driven; the next turn is stepIndex+1).
   let stepIndex = prev.currentStepIndex;
   const lastStepIndex = route.steps.length - 1;
   while (
     stepIndex < lastStepIndex &&
-    distanceToManeuver(position, route, stepIndex) <= ADVANCE_M
+    distanceToManeuver(position, route, stepIndex + 1) <= ADVANCE_M
   ) {
     stepIndex++;
   }
 
-  const distanceToNextTurn = distanceToManeuver(position, route, stepIndex);
+  const distanceToNextTurn = distanceToManeuver(position, route, stepIndex + 1);
   const distanceRemaining =
     distanceToNextTurn + remainingFromStep(route, stepIndex + 1);
   const effectiveSpeed = speed > 1 ? speed : FALLBACK_SPEED;
