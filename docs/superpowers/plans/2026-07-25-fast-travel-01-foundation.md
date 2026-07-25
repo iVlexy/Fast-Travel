@@ -625,17 +625,18 @@ export function updateNav(prev: NavState, position: LatLng, speed: number): NavS
     return { ...prev, status: 'off-route', position, speed };
   }
 
-  // Advance the step if we're within ADVANCE_M of the current maneuver point.
+  // Advance the step once we're within ADVANCE_M of the NEXT maneuver point
+  // (currentStepIndex = the step being driven; the next turn is stepIndex+1).
   let stepIndex = prev.currentStepIndex;
   const lastStepIndex = route.steps.length - 1;
   while (
     stepIndex < lastStepIndex &&
-    distanceToManeuver(position, route, stepIndex) <= ADVANCE_M
+    distanceToManeuver(position, route, stepIndex + 1) <= ADVANCE_M
   ) {
     stepIndex++;
   }
 
-  const distanceToNextTurn = distanceToManeuver(position, route, stepIndex);
+  const distanceToNextTurn = distanceToManeuver(position, route, stepIndex + 1);
   const distanceRemaining =
     distanceToNextTurn + remainingFromStep(route, stepIndex + 1);
   const effectiveSpeed = speed > 1 ? speed : FALLBACK_SPEED;
@@ -847,6 +848,24 @@ git push
 **Placeholder scan:** No TBD/TODO. `SkinId` union in Task 7 is explicitly marked as a placeholder the Plan 2 registry replaces — acceptable and documented.
 
 **Type consistency:** `LatLng`, `Route`, `RouteStep`, `Maneuver`, `NavState`, `NavStatus`, `INITIAL_NAV_STATE` defined once (Task 2), imported everywhere. `beginNav`/`updateNav` signatures consistent across Tasks 5–7. `DirectionsProvider.getRoute` signature consistent Tasks 4 & 6. `getState().reset()` defined in Task 7 and used in its own tests.
+
+---
+
+## Post-Review Amendments (commit `22b3193`)
+
+A full-branch code review after implementation found three real defects. The inline task snippets above predate these fixes; the shipped code is authoritative. Amendments:
+
+1. **Fixture total distance** — `FIXTURE_ROUTE.distance` was `1704` (a copy error; `852 × 2`) but the steps/geometry sum to **`1408`**. Corrected to `1408`. Assertions that hard-coded `1704` (`navSession.test.ts` `beginNav`, `directions.test.ts`, `routeController.test.ts`, and the ETA-comment) were updated to `1408` accordingly.
+2. **Final-step remaining** — `updateNav` relied on a "return 0 when out of range" sentinel for `stepIndex + 1` on the last step, collapsing `distanceRemaining`/`etaSeconds` to `0` while still `navigating` (the 25–30 m band, and any single-step-remaining route). Now, when `stepIndex >= lastStepIndex`, `distanceToNextTurn` and `distanceRemaining` are measured to the destination (`distToDest`).
+3. **Empty-route guard** — `updateNav` dereferenced `route.geometry[last]` unconditionally; a degenerate `{ steps: [], geometry: [] }` route (possible from a real provider in Plan 3) would throw. Added an early guard returning `{ ...prev, position, speed }`.
+
+Tests were hardened alongside: tightened ETA bounds, a mid-route remaining-distance assertion, off-route→recovery, a final-approach "not premature 0" case, and a degenerate-route no-throw case. Full suite: **23/23 green**, `tsc --noEmit` clean.
+
+### Carried into Plan 2/3 (not fixed in Plan 1)
+- `package.json` `"main": "src/index.ts"` is not a valid Expo entry — must change to `expo-router/entry` / `registerRootComponent` when the first App component lands in **Plan 2**.
+- `distanceToNextTurn`/`distanceRemaining` use straight-line haversine to the maneuver, not along-polyline distance — revisit with real Mapbox geometry in **Plan 3**.
+- Step advance keys off proximity to the maneuver *location*, not progress along the polyline — fine for street routes; consider a progress-based model for looping routes in **Plan 3**.
+- Arrival is not "sticky" — a fix moving away after `arrived` flips back to `navigating`. Decide whether to latch in **Plan 2**.
 
 ---
 
