@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Fast Travel",
+    "slug": "fast-travel",
+    "scheme": "fasttravel",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "ios": { "bundleIdentifier": "cloud.browning.fasttravel" },
+    "android": { "package": "cloud.browning.fasttravel" }
+  }
+}
