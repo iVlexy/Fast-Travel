@@ -2,7 +2,7 @@ import { Route } from '../navTypes';
 
 // A simple 3-point L-shaped route: head west, then turn to a destination.
 export const FIXTURE_ROUTE: Route = {
-  distance: 1704,
+  distance: 1408,
   duration: 240,
   geometry: [
     { lat: 40.0, lng: -75.0 },

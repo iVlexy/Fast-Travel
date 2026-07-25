@@ -8,5 +8,5 @@ test('MockDirectionsProvider returns the configured route', async () => {
     { lat: 40.005, lng: -75.01 },
   );
   expect(route.steps).toHaveLength(3);
-  expect(route.distance).toBe(1704);
+  expect(route.distance).toBe(1408);
 });

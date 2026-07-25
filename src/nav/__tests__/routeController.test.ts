@@ -10,5 +10,5 @@ test('RouteController.start fetches a route and returns navigating state', async
   );
   expect(state.status).toBe('navigating');
   expect(state.route).toBe(FIXTURE_ROUTE);
-  expect(state.distanceRemaining).toBe(1704);
+  expect(state.distanceRemaining).toBe(1408);
 });

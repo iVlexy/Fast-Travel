@@ -36,6 +36,10 @@ function remainingFromStep(route: Route, stepIndex: number): number {
 export function updateNav(prev: NavState, position: LatLng, speed: number): NavState {
   const route = prev.route;
   if (!route) return { ...prev, position, speed };
+  // Fix 3: guard degenerate routes so we never dereference an undefined point.
+  if (route.geometry.length === 0 || route.steps.length === 0) {
+    return { ...prev, position, speed };
+  }
 
   const destination = route.geometry[route.geometry.length - 1];
   const distToDest = haversine(position, destination);
@@ -56,8 +60,8 @@ export function updateNav(prev: NavState, position: LatLng, speed: number): NavS
     return { ...prev, status: 'off-route', position, speed };
   }
 
-  // Advance the step once we're within ADVANCE_M of the next maneuver point
-  // (i.e. we've reached the upcoming turn and are now executing that step).
+  // Advance the step once we're within ADVANCE_M of the NEXT maneuver point
+  // (currentStepIndex = the step being driven; the next turn is stepIndex+1).
   let stepIndex = prev.currentStepIndex;
   const lastStepIndex = route.steps.length - 1;
   while (
@@ -67,9 +71,15 @@ export function updateNav(prev: NavState, position: LatLng, speed: number): NavS
     stepIndex++;
   }
 
-  const distanceToNextTurn = distanceToManeuver(position, route, stepIndex + 1);
-  const distanceRemaining =
-    distanceToNextTurn + remainingFromStep(route, stepIndex + 1);
+  // Fix 2: on the final step there is no "next maneuver" — measure to the
+  // destination itself so remaining/ETA don't collapse to 0 while still navigating.
+  const onLastStep = stepIndex >= lastStepIndex;
+  const distanceToNextTurn = onLastStep
+    ? distToDest
+    : distanceToManeuver(position, route, stepIndex + 1);
+  const distanceRemaining = onLastStep
+    ? distToDest
+    : distanceToNextTurn + remainingFromStep(route, stepIndex + 1);
   const effectiveSpeed = speed > 1 ? speed : FALLBACK_SPEED;
   const etaSeconds = Math.round(distanceRemaining / effectiveSpeed);
 
