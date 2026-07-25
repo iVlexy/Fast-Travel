@@ -4,7 +4,7 @@ import { FIXTURE_ROUTE } from '@/nav/__fixtures__/route';
 
 beforeEach(() => useNavStore.getState().reset());
 
-test('store starts idle with a default skin', () => {
+test('store starts idle with the default skin', () => {
   const s = useNavStore.getState();
   expect(s.nav.status).toBe('idle');
   expect(s.activeSkinId).toBe('gta');
@@ -21,10 +21,16 @@ test('applyPosition runs updateNav against the active route', () => {
   expect(useNavStore.getState().nav.status).toBe('arrived');
 });
 
-test('setActiveSkin changes the skin without touching nav', () => {
+test('setActiveSkin changes to a known skin without touching nav', () => {
   useNavStore.getState().setNavState(beginNav(FIXTURE_ROUTE));
   useNavStore.getState().setActiveSkin('pipboy');
   const s = useNavStore.getState();
   expect(s.activeSkinId).toBe('pipboy');
   expect(s.nav.status).toBe('navigating');
+});
+
+test('setActiveSkin ignores an unknown skin id', () => {
+  // @ts-expect-error unknown id
+  useNavStore.getState().setActiveSkin('halo');
+  expect(useNavStore.getState().activeSkinId).toBe('gta');
 });

@@ -1,10 +1,9 @@
 import { create } from 'zustand';
 import { INITIAL_NAV_STATE, LatLng, NavState } from '@/nav/navTypes';
 import { updateNav } from '@/nav/navSession';
+import { SkinId, DEFAULT_SKIN_ID, SKINS } from '@/theme/skinRegistry';
 
-// Skin ids are declared here as a string union placeholder; Plan 2 replaces
-// this with the SkinManifest registry's id type.
-export type SkinId = 'gta' | 'pipboy' | 'minecraft' | 'skyrim' | 'morrowind';
+export type { SkinId };
 
 type NavStore = {
   nav: NavState;
@@ -17,10 +16,12 @@ type NavStore = {
 
 export const useNavStore = create<NavStore>((set, get) => ({
   nav: INITIAL_NAV_STATE,
-  activeSkinId: 'gta',
+  activeSkinId: DEFAULT_SKIN_ID,
   setNavState: (nav) => set({ nav }),
   applyPosition: (position, speed) =>
     set({ nav: updateNav(get().nav, position, speed) }),
-  setActiveSkin: (activeSkinId) => set({ activeSkinId }),
-  reset: () => set({ nav: INITIAL_NAV_STATE, activeSkinId: 'gta' }),
+  setActiveSkin: (activeSkinId) => {
+    if (SKINS[activeSkinId]) set({ activeSkinId });
+  },
+  reset: () => set({ nav: INITIAL_NAV_STATE, activeSkinId: DEFAULT_SKIN_ID }),
 }));
