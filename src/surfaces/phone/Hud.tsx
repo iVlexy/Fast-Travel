@@ -19,6 +19,7 @@ export function Hud({ onStart }: { onStart: () => void }) {
   const nav = useNavStore((s) => s.nav);
   const skin = getSkin(useNavStore((s) => s.activeSkinId));
   const p = skin.tokens.palette;
+  const ls = skin.tokens.typography.letterSpacing * 10;
   const mph = Math.round(nav.speed * 2.23694);
   const next = nav.route?.steps[nav.currentStepIndex + 1] ?? nav.route?.steps[nav.currentStepIndex];
   const instr =
@@ -28,13 +29,13 @@ export function Hud({ onStart }: { onStart: () => void }) {
         ? 'You have arrived'
         : next
           ? next.maneuver.instruction
-          : 'Tap Simulate drive';
+          : 'Long-press the map to set a destination';
 
   return (
     <View style={[styles.wrap, { backgroundColor: `${p.surface}ee`, borderColor: p.routeLine }]}>
       <View style={styles.row}>
-        <Text style={[styles.k, { color: p.textMuted }]}>STATUS</Text>
-        <Text style={[styles.v, { color: nav.status === 'off-route' ? p.danger : p.routeLine }]}>
+        <Text style={[styles.k, { color: p.textMuted, letterSpacing: ls }]}>STATUS</Text>
+        <Text style={[styles.v, { color: nav.status === 'off-route' ? p.danger : p.routeLine, letterSpacing: ls }]}>
           {nav.status.toUpperCase()}
         </Text>
       </View>

@@ -6,6 +6,7 @@ import { getSkin } from '@/theme/skinRegistry';
 import { buildSkinStyle } from '@/map/skinMapStyle';
 import { texturesFor } from '@/map/skinTextures';
 import { Hud } from '@/surfaces/phone/Hud';
+import { SkinFrame } from '@/surfaces/phone/SkinFrame';
 import { SkinSwitcher } from '@/surfaces/phone/SkinSwitcher';
 import { useSimulatedDrive } from '@/surfaces/phone/useSimulatedDrive';
 import { useRouting } from '@/surfaces/phone/useRouting';
@@ -69,6 +70,7 @@ export function MapScreen() {
           </Mapbox.PointAnnotation>
         )}
       </Mapbox.MapView>
+      <SkinFrame />
       <SkinSwitcher />
       <Hud onStart={start} />
     </View>
