@@ -15,7 +15,10 @@ export function useSimulatedDrive() {
 
   const start = () => {
     if (timer.current) clearInterval(timer.current);
-    const route = FIXTURE_ROUTE;
+    // Drive whatever route is currently loaded (a real routed destination), or
+    // fall back to the demo fixture route if none is set yet.
+    const existing = useNavStore.getState().nav.route;
+    const route = existing ?? FIXTURE_ROUTE;
     setNavState(beginNav(route));
 
     const pts = route.geometry;

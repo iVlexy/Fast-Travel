@@ -8,6 +8,7 @@ import { texturesFor } from '@/map/skinTextures';
 import { Hud } from '@/surfaces/phone/Hud';
 import { SkinSwitcher } from '@/surfaces/phone/SkinSwitcher';
 import { useSimulatedDrive } from '@/surfaces/phone/useSimulatedDrive';
+import { useRouting } from '@/surfaces/phone/useRouting';
 
 export function MapScreen() {
   const activeSkinId = useNavStore((s) => s.activeSkinId);
@@ -16,6 +17,16 @@ export function MapScreen() {
   const styleJSON = JSON.stringify(buildSkinStyle(skin));
   const textures = texturesFor(skin.id);
   const { start } = useSimulatedDrive();
+  const { setDestination } = useRouting();
+
+  const destination = nav.route ? nav.route.geometry[nav.route.geometry.length - 1] : null;
+
+  const onLongPress = (feature: GeoJSON.Feature) => {
+    if (feature.geometry.type === 'Point') {
+      const [lng, lat] = feature.geometry.coordinates;
+      setDestination({ lat, lng });
+    }
+  };
 
   const routeShape = nav.route
     ? {
@@ -35,6 +46,7 @@ export function MapScreen() {
         styleJSON={styleJSON}
         scaleBarEnabled={false}
         compassEnabled
+        onLongPress={onLongPress}
       >
         {Object.keys(textures).length > 0 && <Mapbox.Images images={textures} />}
         <Mapbox.Camera followUserLocation followUserMode={UserTrackingMode.FollowWithHeading} followZoomLevel={16} />
@@ -51,6 +63,11 @@ export function MapScreen() {
             />
           </Mapbox.ShapeSource>
         )}
+        {destination && (
+          <Mapbox.PointAnnotation id="destination" coordinate={[destination.lng, destination.lat]}>
+            <View style={[styles.dest, { backgroundColor: skin.tokens.palette.accent, borderColor: skin.tokens.palette.routeCasing }]} />
+          </Mapbox.PointAnnotation>
+        )}
       </Mapbox.MapView>
       <SkinSwitcher />
       <Hud onStart={start} />
@@ -58,4 +75,8 @@ export function MapScreen() {
   );
 }
 
-const styles = StyleSheet.create({ root: { flex: 1 }, map: { flex: 1 } });
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  map: { flex: 1 },
+  dest: { width: 18, height: 18, borderRadius: 9, borderWidth: 3 },
+});
