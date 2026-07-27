@@ -4,6 +4,7 @@ import Mapbox, { UserTrackingMode } from '@rnmapbox/maps';
 import { useNavStore } from '@/state/navStore';
 import { getSkin } from '@/theme/skinRegistry';
 import { buildSkinStyle } from '@/map/skinMapStyle';
+import { texturesFor } from '@/map/skinTextures';
 import { Hud } from '@/surfaces/phone/Hud';
 import { SkinSwitcher } from '@/surfaces/phone/SkinSwitcher';
 import { useSimulatedDrive } from '@/surfaces/phone/useSimulatedDrive';
@@ -13,6 +14,7 @@ export function MapScreen() {
   const nav = useNavStore((s) => s.nav);
   const skin = getSkin(activeSkinId);
   const styleJSON = JSON.stringify(buildSkinStyle(skin));
+  const textures = texturesFor(skin.id);
   const { start } = useSimulatedDrive();
 
   const routeShape = nav.route
@@ -32,10 +34,9 @@ export function MapScreen() {
         style={styles.map}
         styleJSON={styleJSON}
         scaleBarEnabled={false}
-        logoEnabled={false}
-        attributionEnabled={false}
         compassEnabled
       >
+        {Object.keys(textures).length > 0 && <Mapbox.Images images={textures} />}
         <Mapbox.Camera followUserLocation followUserMode={UserTrackingMode.FollowWithHeading} followZoomLevel={16} />
         <Mapbox.UserLocation visible />
         {routeShape && (

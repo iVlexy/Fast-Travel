@@ -1,4 +1,5 @@
 import { SkinManifest } from '@/theme/skinTypes';
+import { patternsFor } from '@/map/skinTextures';
 
 // Per-skin MAP palette (colors the actual map tiles, distinct from HUD tokens).
 // This is what makes the map itself look like each game's map/minimap. These are
@@ -33,6 +34,26 @@ export function mapColorsFor(skinId: string): MapColors {
 // JSON.stringifies it into the MapView's styleJSON prop.
 export function buildSkinStyle(skin: SkinManifest): Record<string, unknown> {
   const c = mapColorsFor(skin.id);
+  const pat = patternsFor(skin.id);
+
+  const bgPaint: Record<string, unknown> = { 'background-color': c.background };
+  if (pat.bg) bgPaint['background-pattern'] = pat.bg;
+
+  const landPaint: Record<string, unknown> = { 'fill-color': c.land, 'fill-opacity': 0.55 };
+  if (pat.landuse) {
+    landPaint['fill-pattern'] = pat.landuse;
+    landPaint['fill-opacity'] = 1;
+  }
+
+  const waterPaint: Record<string, unknown> = { 'fill-color': c.water };
+  if (pat.water) waterPaint['fill-pattern'] = pat.water;
+
+  const buildingPaint: Record<string, unknown> = { 'fill-color': c.building, 'fill-opacity': 0.7 };
+  if (pat.building) {
+    buildingPaint['fill-pattern'] = pat.building;
+    buildingPaint['fill-opacity'] = 1;
+  }
+
   return {
     version: 8,
     name: `fast-travel-${skin.id}`,
@@ -40,20 +61,20 @@ export function buildSkinStyle(skin: SkinManifest): Record<string, unknown> {
       composite: { type: 'vector', url: 'mapbox://mapbox.mapbox-streets-v8' },
     },
     layers: [
-      { id: 'bg', type: 'background', paint: { 'background-color': c.background } },
+      { id: 'bg', type: 'background', paint: bgPaint },
       {
         id: 'landuse',
         type: 'fill',
         source: 'composite',
         'source-layer': 'landuse',
-        paint: { 'fill-color': c.land, 'fill-opacity': 0.55 },
+        paint: landPaint,
       },
       {
         id: 'water',
         type: 'fill',
         source: 'composite',
         'source-layer': 'water',
-        paint: { 'fill-color': c.water },
+        paint: waterPaint,
       },
       {
         id: 'buildings',
@@ -61,7 +82,7 @@ export function buildSkinStyle(skin: SkinManifest): Record<string, unknown> {
         source: 'composite',
         'source-layer': 'building',
         minzoom: 14,
-        paint: { 'fill-color': c.building, 'fill-opacity': 0.7 },
+        paint: buildingPaint,
       },
       {
         id: 'roads',
