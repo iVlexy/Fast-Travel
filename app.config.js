@@ -11,6 +11,7 @@ module.exports = {
     version: '0.1.0',
     orientation: 'portrait',
     userInterfaceStyle: 'dark',
+    splash: { backgroundColor: '#0b0f14', resizeMode: 'contain' },
     ios: { bundleIdentifier: 'cloud.browning.fasttravel', supportsTablet: true },
     android: { package: 'cloud.browning.fasttravel' },
     plugins: [

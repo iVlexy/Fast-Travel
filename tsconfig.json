@@ -5,12 +5,25 @@
     "moduleResolution": "bundler",
     "module": "esnext",
     "target": "esnext",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "jsx": "react-native",
     "skipLibCheck": true,
-    "types": ["jest", "react", "node"],
+    "types": [
+      "jest",
+      "react",
+      "node"
+    ],
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] }
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ],
+  "extends": "expo/tsconfig.base"
 }

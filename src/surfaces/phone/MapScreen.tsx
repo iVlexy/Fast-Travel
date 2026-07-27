@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import Mapbox, { UserTrackingMode } from '@rnmapbox/maps';
 import { useNavStore } from '@/state/navStore';
 import { getSkin } from '@/theme/skinRegistry';
-import { resolveMapStyle } from '@/map/mapStyle';
+import { buildSkinStyle } from '@/map/skinMapStyle';
 import { Hud } from '@/surfaces/phone/Hud';
 import { SkinSwitcher } from '@/surfaces/phone/SkinSwitcher';
 import { useSimulatedDrive } from '@/surfaces/phone/useSimulatedDrive';
@@ -12,7 +12,7 @@ export function MapScreen() {
   const activeSkinId = useNavStore((s) => s.activeSkinId);
   const nav = useNavStore((s) => s.nav);
   const skin = getSkin(activeSkinId);
-  const styleURL = resolveMapStyle(skin.mapStyleRef);
+  const styleJSON = JSON.stringify(buildSkinStyle(skin));
   const { start } = useSimulatedDrive();
 
   const routeShape = nav.route
@@ -30,7 +30,7 @@ export function MapScreen() {
     <View style={styles.root}>
       <Mapbox.MapView
         style={styles.map}
-        styleURL={styleURL}
+        styleJSON={styleJSON}
         scaleBarEnabled={false}
         logoEnabled={false}
         attributionEnabled={false}
